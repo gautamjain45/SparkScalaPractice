@@ -8,6 +8,8 @@ import org.apache.spark.sql.expressions.Window
 object Demo{
 
   implicit val spark : SparkSession = SparkSession.builder().master("local").appName("Demo").getOrCreate()
+  val csvFilePath =  "src/main/resources/demo.csv"
+  var txtFilePath = "src/main/resources/WordCountText.txt"
 
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org").setLevel(Level.ERROR)
@@ -38,7 +40,7 @@ object Demo{
    * @return
    */
   def readCsv()(implicit spark : SparkSession) : DataFrame ={
-    val df = spark.read.format("csv").option("header",true).option("delimiter",",").load("src/main/resources/demo.csv")
+    val df = spark.read.format("csv").option("header",true).option("delimiter",",").load(csvFilePath)
     df
   }
 
@@ -67,6 +69,17 @@ object Demo{
     val maxVal = data.agg(max("Salary")).take(1)(0)(0)
     val result = data.filter(col("Salary") === lit(maxVal))
     result
+  }
+
+  /**
+   * Function to do word count from a csv file
+   * @param spark
+   */
+  def wordCountFromTextFile(txtFile : String = txtFilePath)(implicit spark: SparkSession): Long = {
+    val fileContent = spark.sparkContext.textFile(txtFilePath)
+    val result = fileContent.flatMap(line => line.split(" ")).map(word => (word,1)).reduceByKey(_ + _)
+    result.collect().foreach(x => println(x._1 + " -> " + x._2))
+    result.count()
   }
 
   /**
