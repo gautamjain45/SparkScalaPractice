@@ -1,9 +1,9 @@
 import org.apache.spark.sql.SparkSession
 import org.scalatest.FunSuite
 
-class DemoTest extends FunSuite {
+class DemoTest extends FunSuite with SparkSessionManager {
 
-  implicit val spark = SparkSession.builder().master("local").appName("DemoTest").getOrCreate()
+  implicit val sparkSession: SparkSession = startSession("Demo test")
   val csvFilePath = "src/test/resources/demo.csv"
   val txtFilePath = "src/test/resources/WordCountText.txt"
 
@@ -12,13 +12,13 @@ class DemoTest extends FunSuite {
   }
 
   test("Demo.findHighestSalaryFromEachDepartment"){
-    val csvData = spark.read.format("csv").option("header",true).option("delimiter",",").load(csvFilePath)
-    assert(Demo.findHighestSalaryFromEachDepartment(csvData).count() === 3)
+    val csvData = sparkSession.read.format("csv").option("header",true).option("delimiter",",").load(csvFilePath)
+    assert(Demo.findHighestSalaryFromEachDepartmentUsingGroupBy(csvData).count() === 3)
   }
 
   test("Demo.findHighestSalary"){
-    val csvData = spark.read.format("csv").option("header",true).option("delimiter",",").load(csvFilePath)
-    assert(Demo.findHighestSalary(csvData).count() === 1)
+    val csvData = sparkSession.read.format("csv").option("header",true).option("delimiter",",").load(csvFilePath)
+    assert(Demo.findHighestSalaryInEachDepartmentUsingWinFunc(csvData).count() === 1)
   }
 
   test("Demo.wordCountFromTextFile"){
