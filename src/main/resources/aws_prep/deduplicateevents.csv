@@ -1,0 +1,5 @@
+﻿Field,Type,Description
+click_id,String,Unique ID for the click.
+advertiser_id,Int,The ID of the brand being billed.
+timestamp,Timestamp,When the click actually happened.
+bid_amount,Double,The cost of that specific click.
